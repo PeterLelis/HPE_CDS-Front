@@ -1,0 +1,107 @@
+pipeline {
+    agent any
+    environment {
+        DEPLOY_ENV = 'staging' // o 'production'
+        NODE_VERSION = '18.x'
+        //  Variables para Docker
+        DOCKER_IMAGE_NAME = 'mi-frontend'
+        DOCKER_TAG = 'latest'
+        DOCKER_REGISTRY = 'localhost:8083' // Nexus como registro de Docker
+        FRONTEND_DIR = 'Front-End'
+        SONARQUBE_URL = 'http://localhost:9000'
+        SONAR_SCANNER_PATH = '/var/jenkins_home/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/bin/sonar-scanner'
+    }
+    tools {
+        nodejs 'NodeJS'  // Usa el nombre exacto de tu instalación de NodeJS en Jenkins
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/PeterLelis/HPS_CDS-Front.git', branch: 'main'
+            }
+        }
+        stage('Instalar Dependencias') {
+            steps {
+                sh "cd ${FRONTEND_DIR} && npm install"
+            }
+        }
+        stage('Lint') {
+            steps {
+                sh "cd ${FRONTEND_DIR} && npm run lint"
+            }
+        }
+        stage('Build') {
+            steps {
+                sh "cd ${FRONTEND_DIR} && npm run build:${DEPLOY_ENV}"
+            }
+        }
+        stage('Test') {
+            steps {
+                sh "cd ${FRONTEND_DIR} && npm run test:ci"
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps{
+                withCredentials([string(credentialsId: 'CredSonar', variable: 'SONAR_TOKEN')]) {
+                    sh """
+                        ${SONAR_SCANNER_PATH} \\
+                        -Dsonar.projectKey=hps-cds-frontend \\
+                        -Dsonar.sources=Front-End/src \\
+                        -Dsonar.javascript.lcov.reportPaths=Front-End/coverage/lcov.info \\
+                        -Dsonar.testExecutionReportPaths=Front-End/report.xml \\
+                        -Dsonar.host.url=${SONARQUBE_URL} \\
+                        -Dsonar.login=\${SONAR_TOKEN}
+                    """
+                }
+            }
+        }
+        stage('Construir Imagen de Docker') {
+            steps {
+                script {
+                    def dockerfilePath = "${FRONTEND_DIR}/Dockerfile"
+                    if (fileExists(dockerfilePath)) {
+                        withCredentials([string(credentialsId: 'CredNexus', variable: 'NEXUS_AUTH')]) {
+                            sh """
+                                docker login -u ${NEXUS_USERNAME} -p ${NEXUS_PASSWORD} ${DOCKER_REGISTRY}
+                                docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_TAG} -f ${dockerfilePath} ${FRONTEND_DIR}
+                            """
+                        }
+                    } else {
+                        error "No se encontró el Dockerfile en ${dockerfilePath}"
+                    }
+                }
+            }
+        }
+        stage('Subir Imagen de Docker') {
+            steps {
+                withCredentials([string(credentialsId: 'CredNexus', variable: 'NEXUS_AUTH')]) {
+                    sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
+                }
+            }
+        }
+        stage('Desplegar con Docker Compose') {
+            steps {
+                script {
+                    def composeFile = 'docker-compose.yml'
+                    if (fileExists(composeFile)) {
+                        sh """
+                            docker-compose -f ${composeFile} up -d ${DOCKER_IMAGE_NAME}
+                        """
+                     }
+                    else{
+                       error "No se encontró el archivo docker-compose.yml"
+                    }
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo '¡Pipeline de Frontend finalizado con éxito!'
+        }
+        failure {
+            echo '¡Pipeline de Frontend fallido!'
+        }
+    }
+}
+
