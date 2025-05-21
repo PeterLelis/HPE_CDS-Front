@@ -3,10 +3,9 @@ pipeline {
     environment {
         DEPLOY_ENV = 'production'
         NODE_VERSION = '16.x'
-        // Variables para Docker
         DOCKER_IMAGE_NAME = 'mi-frontend'
         DOCKER_TAG = 'latest'
-        DOCKER_REGISTRY = 'localhost:8083' // Nexus como registro de Docker
+        DOCKER_REGISTRY = 'localhost:8083'
         FRONTEND_DIR = 'Front-End'
         SONARQUBE_URL = 'http://localhost:9000'
         SONAR_SCANNER_PATH = '/var/jenkins_home/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/bin/sonar-scanner'
@@ -26,22 +25,16 @@ pipeline {
         }
         stage('Instalar Dependencias') {
             steps {
-                // Hemos envuelto el 'cd' dentro de un bloque 'dir' para mayor robustez
                 dir("${FRONTEND_DIR}") {
+                    sh "npm cache clean --force"
                     sh "npm install"
+                    sh "npm audit fix || true"
                 }
             }
         }
-        /*stage('Lint') {
-            steps {
-                dir("${FRONTEND_DIR}") {
-                    sh "npm run lint"
-                }
-            }
-        }*/
         stage('Build') {
             steps {
-                dir("${FRONTEND_DIR}") { // Asumiendo que FRONTEND_DIR apunta a la carpeta de tu frontend
+                dir("${FRONTEND_DIR}") {
                     sh "NODE_OPTIONS=--openssl-legacy-provider npm run build:${DEPLOY_ENV}"
                 }
             }
@@ -95,8 +88,6 @@ pipeline {
         stage('Desplegar con Docker Compose') {
             steps {
                 script {
-                    // Si docker-compose.yml está en la raíz del repositorio, esta ruta es correcta.
-                    // Si está dentro de Front-End, debería ser "${FRONTEND_DIR}/docker-compose.yml"
                     def composeFile = 'docker-compose.yml'
                     if (fileExists(composeFile)) {
                         sh """
