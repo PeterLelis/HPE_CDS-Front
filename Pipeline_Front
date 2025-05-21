@@ -40,8 +40,8 @@ pipeline {
         }*/
         stage('Build') {
             steps {
-                dir("${FRONTEND_DIR}") {
-                    sh "npm run build:${DEPLOY_ENV}"
+                dir("${FRONTEND_DIR}") { // Asumiendo que FRONTEND_DIR apunta a la carpeta de tu frontend
+                    sh "NODE_OPTIONS=--openssl-legacy-provider npm run build:${DEPLOY_ENV}"
                 }
             }
         }
