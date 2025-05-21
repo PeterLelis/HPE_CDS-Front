@@ -7,7 +7,7 @@ import {
 } from '@angular/common/http';
 import { Observable, throwError } from '@rxjs';
 import { Injectable } from '@angular/core';
-import { environment } from ''../../environments/environment';
+import { environment } from '../../environments/environment';
 import { retry, catchError } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
