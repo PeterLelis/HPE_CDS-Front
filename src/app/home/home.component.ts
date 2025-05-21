@@ -5,22 +5,20 @@ import { Component, OnInit } from '@angular/core';
   templateUrl: './home.component.html'
 })
 export class HomeComponent implements OnInit {
-  public currentUser: any; // Puedes reemplazar `any` con una interfaz específica
-  public loading: boolean = false; // Agregamos la propiedad `loading`
+  public currentUser: any;
+  public loading = false;  // ← aquí defines la propiedad
 
   constructor() {
-    // Inicializamos currentUser con los datos almacenados en localStorage (si existen)
-    this.currentUser = localStorage.getItem('currentUser') 
-      ? JSON.parse(localStorage.getItem('currentUser')) 
-      : null;
+    const stored = localStorage.getItem('currentUser');
+    this.currentUser = stored ? JSON.parse(stored) : '';
   }
 
   ngOnInit() {
-    // Simulamos una carga para mostrar el spinner
+    // Si vas a usar loading para controlar un spinner, 
+    // podrías hacer algo así:
     this.loading = true;
-    setTimeout(() => {
-      this.loading = false; // Terminamos la "carga" después de 2 segundos
-    }, 2000);
+    // …llamar a tu servicio…
+    // al recibir la respuesta:
+    // this.loading = false;
   }
 }
-
