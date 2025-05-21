@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         DEPLOY_ENV = 'production'
-        NODE_VERSION = '18.x'
+        NODE_VERSION = '16.x'
         // Variables para Docker
         DOCKER_IMAGE_NAME = 'mi-frontend'
         DOCKER_TAG = 'latest'
@@ -12,7 +12,8 @@ pipeline {
         SONAR_SCANNER_PATH = '/var/jenkins_home/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/bin/sonar-scanner'
     }
     tools {
-        nodejs 'NodeJS' // Usa el nombre exacto de tu instalación de NodeJS en Jenkins
+        nodejs 'NodeJS'
+        jdk 'jdk21'
     }
     stages {
         stage('Checkout') {
@@ -48,7 +49,7 @@ pipeline {
         stage('Test') {
             steps {
                 dir("${FRONTEND_DIR}") {
-                    sh "npm run test:ci"
+                    sh "npm run test"
                 }
             }
         }
