@@ -54,7 +54,7 @@ export class CreateIssueComponent implements OnInit {
 
     this.getUsers();
     this.getIssueType();
-    if (this.id != -1) {
+    if (this.id !== -1) { // ¡Corrección aquí! Se cambió '!=' por '!=='
       this.getIssueById();
       this.getIssueStatus();
     }
@@ -175,9 +175,4 @@ export class CreateIssueComponent implements OnInit {
       }
     )
   }
-
-
-
 }
-
-

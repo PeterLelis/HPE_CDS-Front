@@ -22,7 +22,7 @@ export class AuthenticationService {
     login(userName: string, password: string) {
         return this.http.post<any>(`login?userName=` + userName + `&password=` + password, {})
             .pipe(map(user => {
-                console.log(user.response.user)
+                console.log(user.response.user);
                 if (user && user.response.jwtResponse.token) {
                     // store user details in local storage to keep user logged in
                     localStorage.setItem('currentUser', JSON.stringify(user.response.user));
@@ -43,6 +43,5 @@ export class AuthenticationService {
 
     changePassword(id: number, values) {
         return this.http.post<any>(`users/${id}/changePassword`, values);
-      }
-    
+      }  
 }

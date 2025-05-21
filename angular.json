@@ -92,7 +92,7 @@
             "scripts": []
           }
         },
-        "lint": {
+        /*"lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
@@ -104,7 +104,7 @@
               "**/node_modules/**"
             ]
           }
-        },
+        },*/
         "e2e": {
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {

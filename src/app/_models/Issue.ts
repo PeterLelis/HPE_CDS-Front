@@ -14,7 +14,8 @@ export class Issue {
     owner: number,
     assignTo: number,
     type: number,
-    status: number,) {
+    status: number
+  ) {
 
   }
 

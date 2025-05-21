@@ -12,7 +12,7 @@ export class IssueService {
   constructor(private http: HttpClient) { }
 
   getIssues(id: number) {
-    return this.http.get<any>(`issues/user/${id}`);
+    return this.http.get<any>(`issues/user/${id}`); 
   }
 
   getAssignedIssues(id: number) {

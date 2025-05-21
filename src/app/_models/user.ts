@@ -5,11 +5,11 @@ export class User {
   email: string;
   userName: string;
   password: string;
-  active: boolean;          // ← nueva propiedad
+  active: boolean; // ← nueva propiedad
   positionId: number;
-  roleId: number
+  roleId: number; // Punto y coma añadido aquí
   position: Position;
-  role: Role
+  role: Role;
 
   constructor(
     id: number,
@@ -22,7 +22,7 @@ export class User {
     roleId: number,
     position: Position,
     role: Role
-  ) { 
+  ) {
     // this.id=id;
     // this.firstName=firstName,
     // this.lastName=lastName,
@@ -31,35 +31,26 @@ export class User {
     // this.password=password;
     // this.positionId=positionId,
     // this.roleId=roleId;
-    this.position=position,
-    this.role=role;
-    this.active = true;     // valor por defecto al crear
+    this.position = position; // Espacios en blanco eliminados aquí
+    this.role = role;
+    this.active = true; // valor por defecto al crear
   }
-
 }
 
 export enum RoleEnum {
   User = 2,
-  Admin = 1
+  Admin = 1,
 }
-
 
 export class Position {
   id: number;
   key: string;
   descption: string;
-  constructor(
-    id: number,
-    key: string,
-    descption: string
-  ) { }
+  constructor(id: number, key: string, descption: string) {}
 }
 
 export class Role {
   id: number;
   name: string;
-  constructor(
-    id: number,
-    name: string,
-  ) { }
+  constructor(id: number, name: string) {}
 }

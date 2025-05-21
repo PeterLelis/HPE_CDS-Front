@@ -36,7 +36,10 @@ export class LoginComponent implements OnInit {
 
     //check if there error from othher components
     if (this.route.snapshot.paramMap.get("isError")) {
-      this.toastr.error(this.route.snapshot.paramMap.get("errDetail"), this.route.snapshot.paramMap.get("errMsg"));
+      // Corrección: se asigna a variables para evitar el error de "object access via string literals"
+      const errDetail = this.route.snapshot.paramMap.get("errDetail");
+      const errMsg = this.route.snapshot.paramMap.get("errMsg");
+      this.toastr.error(errDetail, errMsg);
     }
 
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';

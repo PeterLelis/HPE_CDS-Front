@@ -1,9 +1,9 @@
 pipeline {
     agent any
     environment {
-        DEPLOY_ENV = 'staging' // o 'production'
+        DEPLOY_ENV = 'production'
         NODE_VERSION = '18.x'
-        //  Variables para Docker
+        // Variables para Docker
         DOCKER_IMAGE_NAME = 'mi-frontend'
         DOCKER_TAG = 'latest'
         DOCKER_REGISTRY = 'localhost:8083' // Nexus como registro de Docker
@@ -12,32 +12,44 @@ pipeline {
         SONAR_SCANNER_PATH = '/var/jenkins_home/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/bin/sonar-scanner'
     }
     tools {
-        nodejs 'NodeJS'  // Usa el nombre exacto de tu instalación de NodeJS en Jenkins
+        nodejs 'NodeJS' // Usa el nombre exacto de tu instalación de NodeJS en Jenkins
     }
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/PeterLelis/HPS_CDS-Front.git', branch: 'main'
+                cleanWs()
+                withCredentials([usernamePassword(credentialsId: 'CredGit', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+                    git url: "https://${GIT_USER}:${GIT_TOKEN}@github.com/PeterLelis/HPE_CDS-Front.git", branch: 'main'
+                }
             }
         }
         stage('Instalar Dependencias') {
             steps {
-                sh "cd ${FRONTEND_DIR} && npm install"
+                // Hemos envuelto el 'cd' dentro de un bloque 'dir' para mayor robustez
+                dir("${FRONTEND_DIR}") {
+                    sh "npm install"
+                }
             }
         }
         stage('Lint') {
             steps {
-                sh "cd ${FRONTEND_DIR} && npm run lint"
+                dir("${FRONTEND_DIR}") {
+                    sh "npm run lint"
+                }
             }
         }
         stage('Build') {
             steps {
-                sh "cd ${FRONTEND_DIR} && npm run build:${DEPLOY_ENV}"
+                dir("${FRONTEND_DIR}") {
+                    sh "npm run build:${DEPLOY_ENV}"
+                }
             }
         }
         stage('Test') {
             steps {
-                sh "cd ${FRONTEND_DIR} && npm run test:ci"
+                dir("${FRONTEND_DIR}") {
+                    sh "npm run test:ci"
+                }
             }
         }
         stage('SonarQube Analysis') {
@@ -60,7 +72,7 @@ pipeline {
                 script {
                     def dockerfilePath = "${FRONTEND_DIR}/Dockerfile"
                     if (fileExists(dockerfilePath)) {
-                        withCredentials([string(credentialsId: 'CredNexus', variable: 'NEXUS_AUTH')]) {
+                        withCredentials([usernamePassword(credentialsId: 'CredNexus', usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
                             sh """
                                 docker login -u ${NEXUS_USERNAME} -p ${NEXUS_PASSWORD} ${DOCKER_REGISTRY}
                                 docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_TAG} -f ${dockerfilePath} ${FRONTEND_DIR}
@@ -74,7 +86,7 @@ pipeline {
         }
         stage('Subir Imagen de Docker') {
             steps {
-                withCredentials([string(credentialsId: 'CredNexus', variable: 'NEXUS_AUTH')]) {
+                withCredentials([usernamePassword(credentialsId: 'CredNexus', usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
                     sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
                 }
             }
@@ -82,14 +94,15 @@ pipeline {
         stage('Desplegar con Docker Compose') {
             steps {
                 script {
+                    // Si docker-compose.yml está en la raíz del repositorio, esta ruta es correcta.
+                    // Si está dentro de Front-End, debería ser "${FRONTEND_DIR}/docker-compose.yml"
                     def composeFile = 'docker-compose.yml'
                     if (fileExists(composeFile)) {
                         sh """
                             docker-compose -f ${composeFile} up -d ${DOCKER_IMAGE_NAME}
                         """
-                     }
-                    else{
-                       error "No se encontró el archivo docker-compose.yml"
+                    } else {
+                        error "No se encontró el archivo docker-compose.yml"
                     }
                 }
             }
@@ -104,4 +117,3 @@ pipeline {
         }
     }
 }
-
