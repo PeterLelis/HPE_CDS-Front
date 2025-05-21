@@ -1,28 +1,17 @@
-// Karma configuration file, see link for more information
-// https://karma-runner.github.io/1.0/config/configuration-file.html
-// Si usas Puppeteer, informa a Karma de la ruta de Chrome
-// y hazlo **antes** de module.exports
-try {
-  process.env.CHROME_BIN = require('puppeteer').executablePath();
-} catch (e) {
-  // si no usas Puppeteer, asumimos que hay un chrome/chromium en PATH
-}
-
+// karma.conf.js
 module.exports = function (config) {
   config.set({
     basePath: '',
     frameworks: ['jasmine', '@angular-devkit/build-angular'],
-	
-    // Le decimos que levante este navegador
+    
     browsers: ['ChromeHeadlessCI'],
 
-    // Definimos el launcher CI
     customLaunchers: {
       ChromeHeadlessCI: {
         base: 'ChromeHeadless',
         flags: [
-          '--no-sandbox',        // necesario en muchos entornos Linux sin privilegios
-          '--disable-gpu',       // evita errores en entornos sin GPU
+          '--no-sandbox',
+          '--disable-gpu',
           '--disable-extensions',
           '--disable-dev-shm-usage',
           '--headless',
@@ -39,11 +28,10 @@ module.exports = function (config) {
       require('@angular-devkit/build-angular/plugins/karma')
     ],
     client: {
-      clearContext: false // leave Jasmine Spec Runner output visible in browser
+      clearContext: false
     },
     coverageIstanbulReporter: {
       dir: require('path').join(__dirname, './coverage/its-app-frontend'),
-      // genera HTML y lcov.info
       reports: ['html', 'lcovonly', 'text-summary'],
       fixWebpackSourcePaths: true
     },
@@ -52,7 +40,6 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: ['Chrome'],
     singleRun: false,
     restartOnFileChange: true
   });
