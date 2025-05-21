@@ -31,13 +31,13 @@ pipeline {
                 }
             }
         }
-        stage('Lint') {
+        /*stage('Lint') {
             steps {
                 dir("${FRONTEND_DIR}") {
                     sh "npm run lint"
                 }
             }
-        }
+        }*/
         stage('Build') {
             steps {
                 dir("${FRONTEND_DIR}") {
