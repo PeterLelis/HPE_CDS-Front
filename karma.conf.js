@@ -39,8 +39,14 @@ module.exports = function (config) {
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: true,
-    singleRun: false,
-    restartOnFileChange: true
+    autoWatch: false, // Generalmente false en CI
+    singleRun: true, // ¡MUY IMPORTANTE para CI/CD! Los tests se ejecutan una vez y luego Karma se cierra.
+    restartOnFileChange: false, // Generalmente false en CI
+
+    // AÑADIDO: Aumentar timeouts para ChromeHeadless en CI
+    browserDisconnectTimeout: 10000, // default 2000
+    browserDisconnectTolerance: 3,   // default 0
+    browserNoActivityTimeout: 60000, // default 10000
+    captureTimeout: 200000           // Aumentamos a 200 segundos (200000 ms) para dar más tiempo.
   });
 };

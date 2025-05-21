@@ -27,7 +27,7 @@ pipeline {
             steps {
                 dir("${FRONTEND_DIR}") {
                     sh "npm cache clean --force"
-                    sh "npm install"
+                    sh "npm install --legacy-peer-deps"
                     sh "npm audit fix || true"
                 }
             }
