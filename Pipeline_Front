@@ -6,9 +6,9 @@ pipeline {
         DOCKER_IMAGE_NAME = 'mi-frontend'
         DOCKER_TAG = 'latest'
         DOCKER_REGISTRY = 'localhost:8083'
-        REPO_NAME = 'HPE_CDS-Front' // ¡IMPORTANTE! Nombre de la carpeta raíz de tu repositorio clonado por Jenkins
-        FRONTEND_DIR = "${REPO_NAME}/Front-End" // Ruta completa a la carpeta Front-End dentro del workspace
-        BACKEND_DIR = "${REPO_NAME}/Back-End"   // Ruta completa a la carpeta Back-End (si existe y la necesitas)
+        REPO_NAME = 'HPE_CDS-Front'
+        FRONTEND_DIR = "${REPO_NAME}/Front-End"
+        BACKEND_DIR = "${REPO_NAME}/Back-End"
         SONARQUBE_URL = 'http://localhost:9000'
         SONAR_SCANNER_PATH = '/var/jenkins_home/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/bin/sonar-scanner'
     }
