@@ -59,24 +59,7 @@ pipeline {
                 }
             }
         }
-        //Esta parte no funciona por unproblema de cersiones...
-        /*stage('Test Frontend') {
-            steps {
-                script {
-                    dir("${FRONTEND_DIR}") {
-                        echo "Cambiando directorio a ${FRONTEND_DIR} para tests..."
-                        sh "pwd"
-                        echo "Verificando el contenido de karma.conf.js en el workspace de Jenkins (${FRONTEND_DIR})..."
-                        sh 'cat karma.conf.js'
-                        echo "Fin de la verificación de karma.conf.js."
-
-                        withEnv(["CHROME_BIN=/usr/bin/google-chrome"]) {
-                            sh 'npm test'
-                        }
-                    }
-                }
-            }
-        }*/
+    
         stage('SonarQube Analysis Frontend') {
     steps {
         script {
