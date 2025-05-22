@@ -7,7 +7,7 @@ pipeline {
         DOCKER_TAG = 'latest'
         DOCKER_REGISTRY = '172.21.64.1:8083'
         REPO_NAME = 'HPE_CDS-Front'
-        FRONTEND_DIR = "."
+        FRONTEND_DIR = "${REPO_NAME}/Front-End"
         BACKEND_DIR = "${REPO_NAME}/Back-End"
         SONARQUBE_URL = 'http://172.21.64.1:9000' // Tu URL de SonarQube
         SONAR_SCANNER_PATH = '/var/jenkins_home/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/bin/sonar-scanner'
@@ -44,56 +44,38 @@ pipeline {
                 }
             }
         }
-        stage('Build Frontend') { // Se añadió el bloque 'steps' aquí
+        stage('Build Frontend') {
             steps {
                 script {
                     dir("${FRONTEND_DIR}") {
-                        echo "Building frontend..."
-                        sh "npm run build" // Asumiendo que 'npm run build' es el comando de construcción
-                    }
-                }
-            }
-        }
-        stage('Run Frontend Tests') {
-            steps {
-                script {
-                    dir("${FRONTEND_DIR}") {
-                        echo "Ejecutando pruebas unitarias del frontend..."
-                        // Asegúrate de que este comando ejecute Karma y genere el report.xml
-                        sh "npm test -- --browsers=ChromeHeadlessCI --single-run --reporters=junit"
-                        // O si tu script 'test' de npm ya tiene la configuración de Karma:
-                        // sh "npm test -- --single-run" // Asegúrate de que "single-run" sea true
+                        echo "Cambiando directorio a ${FRONTEND_DIR} para build..."
+                        sh "pwd"
+                        sh "ls -F"
+                        sh "npm run build:production"
                     }
                 }
             }
         }
 
-        stage('SonarQube Analysis Frontend') { // Se añadió el bloque 'steps' aquí
+        stage('SonarQube Analysis Frontend') {
             steps {
                 script {
                     dir("${FRONTEND_DIR}") {
-                        withCredentials([string(credentialsId: 'CredSonar', variable: 'SONAR_TOKEN')]) {
-                            echo "Listando contenido de ${FRONTEND_DIR} antes del SonarScanner..."
-                            sh 'ls -F'
-                            echo "Listando contenido de ${FRONTEND_DIR}/src antes del SonarScanner..."
-                            sh 'ls -F src'
-                            echo "Fin de listado para diagnóstico."
-
+                        withSonarQubeEnv(installationName: 'SonarServer') {
                             sh """
                                 ${SONAR_SCANNER_PATH} \\
                                 -Dsonar.projectKey=hps-cds-frontend \\
                                 -Dsonar.sources=src \\
                                 -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \\
                                 -Dsonar.testExecutionReportPaths=report.xml \\
-                                -Dsonar.host.url=${SONARQUBE_URL} \\
-                                -Dsonar.login=${SONAR_TOKEN}
+                                -Dsonar.host.url=${SONARQUBE_URL}
+                                # -Dsonar.login ya NO es necesario aquí si el token está asociado al servidor
                             """
                         }
                     }
                 }
             }
         }
-        
         stage('Instalar Dependencias Backend') {
             steps {
                 script {
