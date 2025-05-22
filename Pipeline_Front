@@ -61,24 +61,24 @@ pipeline {
         }
     
         stage('SonarQube Analysis Frontend') {
-    steps {
-        script {
-            dir("${FRONTEND_DIR}") {
-                withCredentials([string(credentialsId: 'CredSonar', variable: 'SONAR_TOKEN')]) {
-                    sh """
-                        ${SONAR_SCANNER_PATH} \\
-                        -Dsonar.projectKey=hps-cds-frontend \\
-                        -Dsonar.sources=src \\ // <--- Ahora es solo 'src' porque el dir base es Front-End
-                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \\ // <--- Relativo al directorio actual
-                        -Dsonar.testExecutionReportPaths=report.xml \\ // <--- Relativo al directorio actual
-                        -Dsonar.host.url=${SONARQUBE_URL} \\
-                        -Dsonar.login=${SONAR_TOKEN}
-                    """
+            steps {
+                script {
+                    dir("${FRONTEND_DIR}") {
+                        withSonarQubeEnv(installationName: 'CredSonar') {
+                            sh """
+                                ${SONAR_SCANNER_PATH} \\
+                                -Dsonar.projectKey=hps-cds-frontend \\
+                                -Dsonar.sources=src \\
+                                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \\
+                                -Dsonar.testExecutionReportPaths=report.xml
+                                # -Dsonar.host.url y -Dsonar.login ya NO son necesarios aquí
+                                # porque withSonarQubeEnv los establece por ti desde la configuración del servidor
+                            """
+                        }
+                    }
                 }
             }
         }
-    }
-}
         stage('Instalar Dependencias Backend') {
             steps {
                 script {
