@@ -78,24 +78,24 @@ pipeline {
             }
         }*/
         stage('SonarQube Analysis Frontend') {
-            steps {
-                script {
-                    dir("${REPO_NAME}") {
-                        withCredentials([string(credentialsId: 'CredSonar', variable: 'SONAR_TOKEN')]) {
-                            sh """
-                                ${SONAR_SCANNER_PATH} \\
-                                -Dsonar.projectKey=hps-cds-frontend \\
-                                -Dsonar.sources=${FRONTEND_DIR}/src \\
-                                -Dsonar.javascript.lcov.reportPaths=${FRONTEND_DIR}/coverage/lcov.info \\
-                                -Dsonar.testExecutionReportPaths=${FRONTEND_DIR}/report.xml \\
-                                -Dsonar.host.url=${SONARQUBE_URL} \\
-                                -Dsonar.login=\${SONAR_TOKEN}
-                            """
-                        }
-                    }
+    steps {
+        script {
+            dir("${REPO_NAME}") {
+                withCredentials([string(credentialsId: 'CredSonar', variable: 'SONAR_TOKEN')]) {
+                    sh """
+                        ${SONAR_SCANNER_PATH} \\
+                        -Dsonar.projectKey=hps-cds-frontend \\
+                        -Dsonar.sources=${FRONTEND_DIR}/src \\
+                        -Dsonar.javascript.lcov.reportPaths=${FRONTEND_DIR}/coverage/lcov.info \\
+                        -Dsonar.testExecutionReportPaths=${FRONTEND_DIR}/report.xml \\
+                        -Dsonar.host.url=${SONARQUBE_URL} \\
+                        -Dsonar.login=\${SONAR_TOKEN}
+                    """
                 }
             }
         }
+    }
+}
         stage('Instalar Dependencias Backend') {
             steps {
                 script {
