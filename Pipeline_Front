@@ -19,19 +19,27 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                cleanWs()
-                withCredentials([usernamePassword(credentialsId: 'CredGit', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
-                    git url: "https://${GIT_USER}:${GIT_TOKEN}@github.com/PeterLelis/HPE_CDS-Front.git", branch: 'main'
+                cleanWs(deleteDirs: true) // Limpia directorios completamente
+                script {
+                    // Primero, clonar el repositorio
+                    withCredentials([usernamePassword(credentialsId: 'CredGit', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+                        git branch: 'main', credentialsId: 'CredGit', url: "https://github.com/PeterLelis/HPE_CDS-Front.git"
+                    }
+                    // Después de clonar, verificar el contenido del workspace de Jenkins
+                    echo "Listando contenido de /var/jenkins_home/workspace/Front/..."
+                    sh 'ls -F /var/jenkins_home/workspace/Front/' // Debería mostrar HPE_CDS-Front/
+                    echo "Fin listado."
                 }
             }
         }
-        stage('Verificar Jenkinsfile') {
+        stage('Verificar Jenkinsfile y Directorios') { // Etapa de diagnóstico ampliada
             steps {
                 script {
-                    dir("${REPO_NAME}") {
-                        echo "Contenido del Jenkinsfile que Jenkins está leyendo:"
+                    dir("${REPO_NAME}") { // Asegurarse de entrar al directorio clonado
+                        echo "Contenido del Jenkinsfile que Jenkins está leyendo dentro de ${REPO_NAME}:"
                         sh 'cat Jenkinsfile'
                         echo "Fin del contenido del Jenkinsfile."
+
                         echo "Contenido del directorio clonado (${REPO_NAME}):"
                         sh 'ls -F'
                         echo "Contenido de ${FRONTEND_DIR}:"
@@ -44,6 +52,9 @@ pipeline {
             steps {
                 script {
                     dir("${FRONTEND_DIR}") {
+                        echo "Cambiando directorio a ${FRONTEND_DIR} para instalar dependencias..."
+                        sh "pwd" // Confirmar la ruta actual
+                        sh "ls -F" // Listar archivos en la ruta actual
                         sh "npm cache clean --force"
                         sh "npm install --legacy-peer-deps"
                         sh "npm audit fix || true"
@@ -55,6 +66,9 @@ pipeline {
             steps {
                 script {
                     dir("${FRONTEND_DIR}") {
+                        echo "Cambiando directorio a ${FRONTEND_DIR} para build..."
+                        sh "pwd"
+                        sh "ls -F"
                         sh "npm run build:production"
                     }
                 }
@@ -64,7 +78,9 @@ pipeline {
             steps {
                 script {
                     dir("${FRONTEND_DIR}") {
-                        echo "Verificando el contenido de karma.conf.js en el workspace de Jenkins..."
+                        echo "Cambiando directorio a ${FRONTEND_DIR} para tests..."
+                        sh "pwd"
+                        echo "Verificando el contenido de karma.conf.js en el workspace de Jenkins (${FRONTEND_DIR})..."
                         sh 'cat karma.conf.js'
                         echo "Fin de la verificación de karma.conf.js."
 
