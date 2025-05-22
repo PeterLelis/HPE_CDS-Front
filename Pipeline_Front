@@ -44,20 +44,23 @@ pipeline {
                 }
             }
         }
-        stage('Build Frontend') {
+        stage('Build Frontend') { /* ... */ }
+
+        stage('Run Frontend Tests') {
             steps {
                 script {
                     dir("${FRONTEND_DIR}") {
-                        echo "Cambiando directorio a ${FRONTEND_DIR} para build..."
-                        sh "pwd"
-                        sh "ls -F"
-                        sh "npm run build:production"
+                        echo "Ejecutando pruebas unitarias del frontend..."
+                        // Asegúrate de que este comando ejecute Karma y genere el report.xml
+                        sh "npm test -- --browsers=ChromeHeadlessCI --single-run --reporters=junit"
+                        // O si tu script 'test' de npm ya tiene la configuración de Karma:
+                        // sh "npm test -- --single-run" // Asegúrate de que "single-run" sea true
                     }
                 }
             }
         }
 
-        stage('SonarQube Analysis Frontend') {
+        stage('SonarQube Analysis Frontend') { /* ... */ }
             steps {
                 script {
                     dir("${FRONTEND_DIR}") {
@@ -81,7 +84,7 @@ pipeline {
                     }
                 }
             }
-        }
+        
         stage('Instalar Dependencias Backend') {
             steps {
                 script {

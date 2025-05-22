@@ -29,7 +29,8 @@ module.exports = function (config) {
       require('karma-chrome-launcher'),
       require('karma-jasmine-html-reporter'),
       require('karma-coverage-istanbul-reporter'),
-      require('@angular-devkit/build-angular/plugins/karma')
+      require('@angular-devkit/build-angular/plugins/karma'),
+      require('karma-junit-reporter') // <--- AÑADIR ESTA LÍNEA
     ],
     client: {
       clearContext: false
@@ -39,7 +40,17 @@ module.exports = function (config) {
       reports: ['html', 'lcovonly', 'text-summary'],
       fixWebpackSourcePaths: true
     },
-    reporters: ['progress', 'kjhtml'],
+    // Modificar la línea de reporters para incluir 'junit'
+    reporters: ['progress', 'kjhtml', 'junit'], // <--- MODIFICAR ESTA LÍNEA
+    
+    // AÑADIR LA SECCIÓN DE CONFIGURACIÓN PARA JUNIT REPORTER
+    junitReporter: {
+      outputDir: '', // Directorio donde se generará el reporte. Vacío significa el basePath.
+      outputFile: 'report.xml', // Nombre del archivo de reporte.
+      useBrowserName: false, // Opcional: si quieres incluir el nombre del navegador en el nombre del archivo.
+      properties: {}
+    },
+
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
