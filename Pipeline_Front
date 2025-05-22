@@ -15,6 +15,7 @@ pipeline {
     tools {
         nodejs 'NodeJS'
         jdk 'jdk21'
+
     }
     stages {
         stage('Checkout') {
@@ -29,22 +30,6 @@ pipeline {
                     echo "Listando contenido de /var/jenkins_home/workspace/Front/..."
                     sh 'ls -F /var/jenkins_home/workspace/Front/' // Debería mostrar HPE_CDS-Front/
                     echo "Fin listado."
-                }
-            }
-        }
-        stage('Verificar Jenkinsfile y Directorios') { // Etapa de diagnóstico ampliada
-            steps {
-                script {
-                    dir("${REPO_NAME}") { // Asegurarse de entrar al directorio clonado
-                        echo "Contenido del Jenkinsfile que Jenkins está leyendo dentro de ${REPO_NAME}:"
-                        sh 'cat Jenkinsfile'
-                        echo "Fin del contenido del Jenkinsfile."
-
-                        echo "Contenido del directorio clonado (${REPO_NAME}):"
-                        sh 'ls -F'
-                        echo "Contenido de ${FRONTEND_DIR}:"
-                        sh "ls -F ${FRONTEND_DIR}"
-                    }
                 }
             }
         }
