@@ -25,53 +25,70 @@ pipeline {
                 }
             }
         }
-        stage('Instalar Dependencias') {
+        stage('Instalar Dependencias Frontend') {
             steps {
-                dir("${FRONTEND_DIR}") {
-                    sh "npm cache clean --force"
-                    sh "npm install --legacy-peer-deps"
-                    sh "npm audit fix || true"
+                script {
+                    dir("${FRONTEND_DIR}") {
+                        sh "npm cache clean --force"
+                        sh "npm install --legacy-peer-deps"
+                        sh "npm audit fix || true"
+                    }
                 }
             }
         }
-        stage('Build') {
+        stage('Build Frontend') {
             steps {
-                dir("${FRONTEND_DIR}") {
-                    sh "npm run build:production"
+                script {
+                    dir("${FRONTEND_DIR}") {
+                        sh "npm run build:production"
+                    }
                 }
             }
         }
-        stage('Test') {
-                steps {
-                    script {
-                        dir('Front-End') {
-                            echo "Verificando el contenido de karma.conf.js en el workspace de Jenkins..."
-                            sh 'cat karma.conf.js'
-                            echo "Fin de la verificación de karma.conf.js."
+        stage('Test Frontend') {
+            steps {
+                script {
+                    dir("${FRONTEND_DIR}") {
+                        echo "Verificando el contenido de karma.conf.js en el workspace de Jenkins..."
+                        sh 'cat karma.conf.js' // ¡Ahora sí debería encontrarlo!
+                        echo "Fin de la verificación de karma.conf.js."
 
-                            withEnv(["CHROME_BIN=/usr/bin/google-chrome"]) {
-                                sh 'npm test'
-                            }
+                        withEnv(["CHROME_BIN=/usr/bin/google-chrome"]) {
+                            sh 'npm test'
                         }
                     }
                 }
             }
-        stage('SonarQube Analysis') {
-            steps{
-                withCredentials([string(credentialsId: 'CredSonar', variable: 'SONAR_TOKEN')]) {
-                    sh """
-                        ${SONAR_SCANNER_PATH} \\
-                        -Dsonar.projectKey=hps-cds-frontend \\
-                        -Dsonar.sources=Front-End/src \\
-                        -Dsonar.javascript.lcov.reportPaths=Front-End/coverage/lcov.info \\
-                        -Dsonar.testExecutionReportPaths=Front-End/report.xml \\
-                        -Dsonar.host.url=${SONARQUBE_URL} \\
-                        -Dsonar.login=\${SONAR_TOKEN}
-                    """
+        }
+        stage('SonarQube Analysis Frontend') {
+            steps {
+                script {
+                    dir("${REPO_NAME}") { // El sonar-scanner se ejecuta desde la raíz del repositorio
+                        withCredentials([string(credentialsId: 'CredSonar', variable: 'SONAR_TOKEN')]) {
+                            sh """
+                                ${SONAR_SCANNER_PATH} \\
+                                -Dsonar.projectKey=hps-cds-frontend \\
+                                -Dsonar.sources=${FRONTEND_DIR}/src \\ // <-- ¡CORRECCIÓN CLAVE AQUÍ!
+                                -Dsonar.javascript.lcov.reportPaths=${FRONTEND_DIR}/coverage/lcov.info \\ // <-- ¡CORRECCIÓN CLAVE AQUÍ!
+                                -Dsonar.testExecutionReportPaths=${FRONTEND_DIR}/report.xml \\ // <-- ¡CORRECCIÓN CLAVE AQUÍ!
+                                -Dsonar.host.url=${SONARQUBE_URL} \\
+                                -Dsonar.login=\${SONAR_TOKEN}
+                            """
+                        }
+                    }
                 }
             }
         }
-        stage('Construir Imagen de Docker') {
+        stage('Instalar Dependencias Backend') {
+            steps {
+                script {
+                    dir("${BACKEND_DIR}") { // Esto ahora se expande a "HPE_CDS-Front/Back-End"
+                        sh 'mvn clean install -DskipTests'
+                    }
+                }
+            }
+        }
+        stage('Construir Imagen Frontend Docker') {
             steps {
                 script {
                     def dockerfilePath = "${FRONTEND_DIR}/Dockerfile"
@@ -88,7 +105,7 @@ pipeline {
                 }
             }
         }
-        stage('Subir Imagen de Docker') {
+        stage('Subir Imagen Frontend Docker') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'CredNexus', usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
                     sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
@@ -98,13 +115,15 @@ pipeline {
         stage('Desplegar con Docker Compose') {
             steps {
                 script {
-                    def composeFile = 'docker-compose.yml'
-                    if (fileExists(composeFile)) {
-                        sh """
-                            docker-compose -f ${composeFile} up -d ${DOCKER_IMAGE_NAME}
-                        """
-                    } else {
-                        error "No se encontró el archivo docker-compose.yml"
+                    dir("${REPO_NAME}") {
+                        def composeFile = 'docker-compose.yml'
+                        if (fileExists(composeFile)) {
+                            sh """
+                                docker-compose -f ${composeFile} up -d ${DOCKER_IMAGE_NAME}
+                            """
+                        } else {
+                            error "No se encontró el archivo docker-compose.yml en ${REPO_NAME}" // Mensaje de error más claro
+                        }
                     }
                 }
             }
