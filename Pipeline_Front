@@ -9,26 +9,23 @@ pipeline {
         REPO_NAME = 'HPE_CDS-Front'
         FRONTEND_DIR = "${REPO_NAME}/Front-End"
         BACKEND_DIR = "${REPO_NAME}/Back-End"
-        SONARQUBE_URL = 'http://172.21.64.1:9000'
+        SONARQUBE_URL = 'http://172.21.64.1:9000' // Tu URL de SonarQube
         SONAR_SCANNER_PATH = '/var/jenkins_home/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/bin/sonar-scanner'
     }
     tools {
         nodejs 'NodeJS'
         jdk 'jdk21'
-
     }
     stages {
         stage('Checkout') {
             steps {
-                cleanWs(deleteDirs: true) // Limpia directorios completamente
+                cleanWs(deleteDirs: true)
                 script {
-                    // Primero, clonar el repositorio
                     withCredentials([usernamePassword(credentialsId: 'CredGit', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
                         git branch: 'main', credentialsId: 'CredGit', url: "https://github.com/PeterLelis/HPE_CDS-Front.git"
                     }
-                    // Después de clonar, verificar el contenido del workspace de Jenkins
                     echo "Listando contenido de /var/jenkins_home/workspace/Front/..."
-                    sh 'ls -F /var/jenkins_home/workspace/Front/' // Debería mostrar HPE_CDS-Front/
+                    sh 'ls -F /var/jenkins_home/workspace/Front/'
                     echo "Fin listado."
                 }
             }
@@ -38,8 +35,8 @@ pipeline {
                 script {
                     dir("${FRONTEND_DIR}") {
                         echo "Cambiando directorio a ${FRONTEND_DIR} para instalar dependencias..."
-                        sh "pwd" // Confirmar la ruta actual
-                        sh "ls -F" // Listar archivos en la ruta actual
+                        sh "pwd"
+                        sh "ls -F"
                         sh "npm cache clean --force"
                         sh "npm install --legacy-peer-deps"
                         sh "npm audit fix || true"
@@ -59,27 +56,26 @@ pipeline {
                 }
             }
         }
-    
+
         stage('SonarQube Analysis Frontend') {
-    steps {
-        script {
-            dir("${FRONTEND_DIR}") {
-                withSonarQubeEnv(installationName: 'SonarServer') {
-                    sh """
-                        ${SONAR_SCANNER_PATH} \\
-                        -Dsonar.projectKey=hps-cds-frontend \\
-                        -Dsonar.sources=src \\
-                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \\
-                        -Dsonar.testExecutionReportPaths=report.xml
-                        # Las líneas de host.url y login se ELIMINAN porque withSonarQubeEnv las gestiona
-                        # -Dsonar.host.url=${SONARQUBE_URL} \\  <-- ¡QUITAR ESTA LÍNEA!
-                        # -Dsonar.login="${SONAR_TOKEN}"   <-- ¡QUITAR ESTA LÍNEA!
-                    """
+            steps {
+                script {
+                    dir("${FRONTEND_DIR}") {
+                        withSonarQubeEnv(installationName: 'SonarServer') {
+                            sh """
+                                ${SONAR_SCANNER_PATH} \\
+                                -Dsonar.projectKey=hps-cds-frontend \\
+                                -Dsonar.sources=src \\
+                                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \\
+                                -Dsonar.testExecutionReportPaths=report.xml \\
+                                -Dsonar.host.url=${SONARQUBE_URL} // <-- ¡Añadimos esta línea de nuevo!
+                                # -Dsonar.login ya NO es necesario aquí si el token está asociado al servidor
+                            """
+                        }
+                    }
                 }
             }
         }
-    }
-}
         stage('Instalar Dependencias Backend') {
             steps {
                 script {
