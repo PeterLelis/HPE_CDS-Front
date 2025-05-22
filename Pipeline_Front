@@ -25,6 +25,21 @@ pipeline {
                 }
             }
         }
+        stage('Verificar Jenkinsfile') {
+            steps {
+                script {
+                    dir("${REPO_NAME}") {
+                        echo "Contenido del Jenkinsfile que Jenkins está leyendo:"
+                        sh 'cat Jenkinsfile'
+                        echo "Fin del contenido del Jenkinsfile."
+                        echo "Contenido del directorio clonado (${REPO_NAME}):"
+                        sh 'ls -F'
+                        echo "Contenido de ${FRONTEND_DIR}:"
+                        sh "ls -F ${FRONTEND_DIR}"
+                    }
+                }
+            }
+        }
         stage('Instalar Dependencias Frontend') {
             steps {
                 script {
@@ -50,7 +65,7 @@ pipeline {
                 script {
                     dir("${FRONTEND_DIR}") {
                         echo "Verificando el contenido de karma.conf.js en el workspace de Jenkins..."
-                        sh 'cat karma.conf.js' // ¡Ahora sí debería encontrarlo!
+                        sh 'cat karma.conf.js'
                         echo "Fin de la verificación de karma.conf.js."
 
                         withEnv(["CHROME_BIN=/usr/bin/google-chrome"]) {
@@ -63,14 +78,14 @@ pipeline {
         stage('SonarQube Analysis Frontend') {
             steps {
                 script {
-                    dir("${REPO_NAME}") { // El sonar-scanner se ejecuta desde la raíz del repositorio
+                    dir("${REPO_NAME}") {
                         withCredentials([string(credentialsId: 'CredSonar', variable: 'SONAR_TOKEN')]) {
                             sh """
                                 ${SONAR_SCANNER_PATH} \\
                                 -Dsonar.projectKey=hps-cds-frontend \\
-                                -Dsonar.sources=${FRONTEND_DIR}/src \\ // <-- ¡CORRECCIÓN CLAVE AQUÍ!
-                                -Dsonar.javascript.lcov.reportPaths=${FRONTEND_DIR}/coverage/lcov.info \\ // <-- ¡CORRECCIÓN CLAVE AQUÍ!
-                                -Dsonar.testExecutionReportPaths=${FRONTEND_DIR}/report.xml \\ // <-- ¡CORRECCIÓN CLAVE AQUÍ!
+                                -Dsonar.sources=${FRONTEND_DIR}/src \\
+                                -Dsonar.javascript.lcov.reportPaths=${FRONTEND_DIR}/coverage/lcov.info \\
+                                -Dsonar.testExecutionReportPaths=${FRONTEND_DIR}/report.xml \\
                                 -Dsonar.host.url=${SONARQUBE_URL} \\
                                 -Dsonar.login=\${SONAR_TOKEN}
                             """
@@ -82,7 +97,7 @@ pipeline {
         stage('Instalar Dependencias Backend') {
             steps {
                 script {
-                    dir("${BACKEND_DIR}") { // Esto ahora se expande a "HPE_CDS-Front/Back-End"
+                    dir("${BACKEND_DIR}") {
                         sh 'mvn clean install -DskipTests'
                     }
                 }
@@ -122,7 +137,7 @@ pipeline {
                                 docker-compose -f ${composeFile} up -d ${DOCKER_IMAGE_NAME}
                             """
                         } else {
-                            error "No se encontró el archivo docker-compose.yml en ${REPO_NAME}" // Mensaje de error más claro
+                            error "No se encontró el archivo docker-compose.yml en ${REPO_NAME}"
                         }
                     }
                 }
