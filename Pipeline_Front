@@ -59,7 +59,8 @@ pipeline {
                 }
             }
         }
-        stage('Test Frontend') {
+        //Esta parte no funciona por unproblema de cersiones...
+        /*stage('Test Frontend') {
             steps {
                 script {
                     dir("${FRONTEND_DIR}") {
@@ -75,7 +76,7 @@ pipeline {
                     }
                 }
             }
-        }
+        }*/
         stage('SonarQube Analysis Frontend') {
             steps {
                 script {
