@@ -15,6 +15,7 @@ pipeline {
     tools {
         nodejs 'NodeJS'
         jdk 'jdk21'
+        SonarQube 'SonarServer'
     }
     stages {
         stage('Checkout') {
@@ -61,15 +62,16 @@ pipeline {
             steps {
                 script {
                     dir("${FRONTEND_DIR}") {
-                        withSonarQubeEnv(installationName: 'SonarServer') {
+                        // Obtenemos el token de SonarQube
+                        withCredentials([string(credentialsId: 'CredSonar', variable: 'SONAR_TOKEN')]) { // Asume 'CredSonar' es un String Secret con tu token
                             sh """
                                 ${SONAR_SCANNER_PATH} \\
                                 -Dsonar.projectKey=hps-cds-frontend \\
                                 -Dsonar.sources=src \\
                                 -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \\
                                 -Dsonar.testExecutionReportPaths=report.xml \\
-                                -Dsonar.host.url=${SONARQUBE_URL}
-                                # -Dsonar.login ya NO es necesario aquí si el token está asociado al servidor
+                                -Dsonar.host.url=${SONARQUBE_URL} \\ // <-- Mantener la URL explícita
+                                -Dsonar.login=${SONAR_TOKEN}       // <-- Añadir el token explícitamente
                             """
                         }
                     }
