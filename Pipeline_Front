@@ -68,7 +68,7 @@ pipeline {
                                 -Dsonar.sources=src \\
                                 -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \\
                                 -Dsonar.testExecutionReportPaths=report.xml \\
-                                -Dsonar.host.url=${SONARQUBE_URL} // <-- ¡Añadimos esta línea de nuevo!
+                                -Dsonar.host.url=${SONARQUBE_URL}
                                 # -Dsonar.login ya NO es necesario aquí si el token está asociado al servidor
                             """
                         }
