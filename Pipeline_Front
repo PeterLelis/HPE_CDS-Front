@@ -40,16 +40,20 @@ pipeline {
             }
         }
         stage('Test') {
-            steps {
-                script {
-                    withEnv(["CHROME_BIN=/usr/bin/google-chrome"]) {
-                        dir("${FRONTEND_DIR}") {
-                            sh "npm run test"
+                steps {
+                    script {
+                        dir('Front-End') {
+                            echo "Verificando el contenido de karma.conf.js en el workspace de Jenkins..."
+                            sh 'cat karma.conf.js'
+                            echo "Fin de la verificación de karma.conf.js."
+
+                            withEnv(["CHROME_BIN=/usr/bin/google-chrome"]) {
+                                sh 'npm test'
+                            }
                         }
                     }
                 }
             }
-        }
         stage('SonarQube Analysis') {
             steps{
                 withCredentials([string(credentialsId: 'CredSonar', variable: 'SONAR_TOKEN')]) {
