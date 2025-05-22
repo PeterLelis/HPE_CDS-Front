@@ -7,9 +7,9 @@ pipeline {
         DOCKER_TAG = 'latest'
         DOCKER_REGISTRY = '172.21.64.1:8083'
         REPO_NAME = 'HPE_CDS-Front'
-        FRONTEND_DIR = "."
+        FRONTEND_DIR = "${REPO_NAME}/Front-End"
         BACKEND_DIR = "${REPO_NAME}/Back-End"
-        SONARQUBE_URL = 'http://172.21.64.1:9000' // Tu URL de SonarQube
+        SONARQUBE_URL = 'http://172.21.64.1:9000'
         SONAR_SCANNER_PATH = '/var/jenkins_home/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/bin/sonar-scanner'
     }
     tools {
