@@ -64,15 +64,16 @@ pipeline {
     steps {
         script {
             dir("${FRONTEND_DIR}") {
-                withSonarQubeEnv(installationName: 'CredSonar') {
+                withSonarQubeEnv(installationName: 'SonarServer') {
                     sh """
                         ${SONAR_SCANNER_PATH} \\
                         -Dsonar.projectKey=hps-cds-frontend \\
                         -Dsonar.sources=src \\
                         -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \\
                         -Dsonar.testExecutionReportPaths=report.xml
-                        # -Dsonar.host.url y -Dsonar.login ya NO son necesarios aquí.
-                        # withSonarQubeEnv los configura automáticamente desde la configuración del servidor en Jenkins.
+                        # Las líneas de host.url y login se ELIMINAN porque withSonarQubeEnv las gestiona
+                        # -Dsonar.host.url=${SONARQUBE_URL} \\  <-- ¡QUITAR ESTA LÍNEA!
+                        # -Dsonar.login="${SONAR_TOKEN}"   <-- ¡QUITAR ESTA LÍNEA!
                     """
                 }
             }
