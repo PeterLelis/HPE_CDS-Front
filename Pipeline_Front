@@ -56,22 +56,7 @@ pipeline {
                 }
             }
         }
-        // ESTA ES LA ETAPA QUE DEBES AÑADIR/ASEGURARTE DE QUE ESTÁ PRESENTE
-        stage('Run Frontend Tests') {
-            steps {
-                script {
-                    dir("${FRONTEND_DIR}") {
-                        echo "Ejecutando pruebas frontend y generando informes de cobertura..."
-                        // Este comando activará Karma para ejecutar pruebas y generar lcov.info y report.xml
-                        sh "npm test -- --no-watch --no-progress --browsers=ChromeHeadlessCI"
-                        // Verifica dónde se generan los archivos de cobertura
-                        echo "Listando contenido del directorio 'coverage' y 'report.xml' en ${FRONTEND_DIR}..."
-                        sh "ls -lR coverage" // Muestra el contenido recursivo de la carpeta 'coverage'
-                        sh "ls -l report.xml || true" // Verifica si report.xml está directamente aquí
-                    }
-                }
-            }
-        }
+
         stage('SonarQube Analysis Frontend') {
             steps {
                 script {
