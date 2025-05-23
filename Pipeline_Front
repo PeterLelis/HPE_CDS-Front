@@ -60,16 +60,15 @@ pipeline {
         stage('SonarQube Analysis Frontend') {
             steps {
                 script {
-                    dir("${FRONTEND_DIR}") {
+                    dir(env.WORKSPACE) {
                         withSonarQubeEnv(installationName: 'SonarServer') {
                             sh """
                                 ${SONAR_SCANNER_PATH} \\
                                 -Dsonar.projectKey=hps-cds-frontend \\
                                 -Dsonar.sources=src \\
-                                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \\
-                                -Dsonar.testExecutionReportPaths=report.xml \\
+                                -Dsonar.javascript.lcov.reportPaths=${FRONTEND_DIR}/coverage/lcov.info \\
+                                -Dsonar.testExecutionReportPaths=${FRONTEND_DIR}/report.xml \\
                                 -Dsonar.host.url=${SONARQUBE_URL}
-                                # -Dsonar.login ya NO es necesario aquí si el token está asociado al servidor
                             """
                         }
                     }
