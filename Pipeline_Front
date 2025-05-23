@@ -72,19 +72,10 @@ pipeline {
                 }
             }
         }
-        /*stage('Instalar Dependencias Backend') {
-            steps {
-                script {
-                    dir("${BACKEND_DIR}") {
-                        sh 'mvn clean install -DskipTests'
-                    }
-                }
-            }
-        }*/
         stage('Construir Imagen Frontend Docker') {
             steps {
                 script {
-                    def dockerfilePath = "${FRONTEND_DIR}/Dockerfile"
+                    def dockerfilePath = "${env.WORKSPACE}/Dockerfile"
                     if (fileExists(dockerfilePath)) {
                         withCredentials([usernamePassword(credentialsId: 'CredNexus', usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD')]) {
                             sh """
