@@ -5,11 +5,11 @@ pipeline {
         NODE_VERSION = '16.x'
         DOCKER_IMAGE_NAME = 'mi-frontend'
         DOCKER_TAG = 'latest'
-        DOCKER_REGISTRY = '172.21.64.1:8083'
+        DOCKER_REGISTRY = 'nexus:8083'
         REPO_NAME = 'HPE_CDS-Front'
         FRONTEND_DIR = "${REPO_NAME}/Front-End"
         BACKEND_DIR = "${REPO_NAME}/Back-End"
-        SONARQUBE_URL = 'http://172.21.64.1:9000'
+        SONARQUBE_URL = 'http://sonarqube:9000'
         SONAR_SCANNER_PATH = '/var/jenkins_home/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/bin/sonar-scanner'
     }
     tools {
@@ -39,7 +39,6 @@ pipeline {
                         sh "ls -F"
                         sh "npm cache clean --force"
                         sh "npm install --legacy-peer-deps"
-                        sh "npm audit fix || true"
                     }
                 }
             }
@@ -66,8 +65,8 @@ pipeline {
                                 ${SONAR_SCANNER_PATH} \\
                                 -Dsonar.projectKey=hps-cds-frontend \\
                                 -Dsonar.sources=src \\
-                                -Dsonar.javascript.lcov.reportPaths=${FRONTEND_DIR}/coverage/its-app-frontend/lcov.info \\
-                                -Dsonar.testExecutionReportPaths=${FRONTEND_DIR}/report.xml \\
+                                #-Dsonar.javascript.lcov.reportPaths=${FRONTEND_DIR}/coverage/its-app-frontend/lcov.info \\
+                                #-Dsonar.testExecutionReportPaths=${FRONTEND_DIR}/report.xml \\
                                 -Dsonar.host.url=${SONARQUBE_URL}
                             """
                         }
