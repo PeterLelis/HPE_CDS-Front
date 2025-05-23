@@ -72,7 +72,7 @@ pipeline {
                 }
             }
         }
-        stage('Instalar Dependencias Backend') {
+        /*stage('Instalar Dependencias Backend') {
             steps {
                 script {
                     dir("${BACKEND_DIR}") {
@@ -80,7 +80,7 @@ pipeline {
                     }
                 }
             }
-        }
+        }*/
         stage('Construir Imagen Frontend Docker') {
             steps {
                 script {
