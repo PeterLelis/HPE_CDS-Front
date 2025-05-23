@@ -5,7 +5,7 @@ pipeline {
         NODE_VERSION = '16.x'
         DOCKER_IMAGE_NAME = 'mi-frontend'
         DOCKER_TAG = 'latest'
-        DOCKER_REGISTRY = 'nexus:8083'
+        DOCKER_REGISTRY = 'nexus_Bueno:8083'
         REPO_NAME = 'HPE_CDS-Front'
         FRONTEND_DIR = "${REPO_NAME}/Front-End"
         BACKEND_DIR = "${REPO_NAME}/Back-End"
