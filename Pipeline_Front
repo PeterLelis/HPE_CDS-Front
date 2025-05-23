@@ -65,8 +65,6 @@ pipeline {
                                 ${SONAR_SCANNER_PATH} \\
                                 -Dsonar.projectKey=hps-cds-frontend \\
                                 -Dsonar.sources=src \\
-                                #-Dsonar.javascript.lcov.reportPaths=${FRONTEND_DIR}/coverage/its-app-frontend/lcov.info \\
-                                #-Dsonar.testExecutionReportPaths=${FRONTEND_DIR}/report.xml \\
                                 -Dsonar.host.url=${SONARQUBE_URL}
                             """
                         }
